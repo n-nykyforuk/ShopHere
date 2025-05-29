@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${advertisement?.title} + ' - Advertisement Details'">Ad Info</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/uploads/background.jpg");
+            color: #333;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2b2b2b;
+            color: white;
+            padding: 10px 20px;
+        }
+        .navbar .left {
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+        .navbar .search-form {
+            display: flex;
+            align-items: center;
+        }
+        .navbar .search-form input {
+            padding: 5px;
+            border: none;
+            border-radius: 3px 0 0 3px;
+            outline: none;
+        }
+        .navbar .search-form button {
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 0 3px 3px 0;
+            cursor: pointer;
+        }
+        .navbar .right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .navbar .right a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .navbar .right .heart {
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ff4d4d;
+        }
+        .info-container {
+            max-width: 700px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            background-color: #ffffff;
+        }
+        .info-container img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+            background-color: transparent;
+        }
+        .info-container h2 {
+            margin-bottom: 10px;
+        }
+        .info-container .price {
+            font-size: 1.2em;
+            color: green;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .info-container .desc {
+            margin-bottom: 15px;
+        }
+        .info-container .date {
+            padding: 5px 10px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+        .info-container .btn-fav {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .info-container .btn-buy {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-left: 10px;
+            text-decoration: none;
+        }
+        .user-info-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #ccc;
+            text-align: left;
+        }
+        .user-info-section .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 10px;
+            vertical-align: middle;
+            border: 1px solid #ccc;
+        }
+        .user-info-section p {
+            margin: 5px 0;
+        }
+        .user-info-section .label {
+            font-weight: bold;
+            color: #333;
+        }
+        .user-info-section .btn-message {
+            display: inline-block;
+            padding: 8px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .user-info-section .no-email {
+            color: #666;
+            font-style: italic;
+        }
+        .error-message {
+            text-align: center;
+            margin: 40px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            max-width: 700px;
+        }
+        .own-ad-message {
+            display: inline-block;
+            margin-left: 10px;
+            color: #666;
+            font-style: italic;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="left">ShopHere</div>
+    <div class="search-form">
+        <form th:action="@{/advertisement}" method="get">
+            <input type="text" name="search" placeholder="Search by title..." />
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div class="right">
+        <a href="/advertisement/create">Add your advertisement</a>
+        <a href="/advertisement/mine">Your advertisement</a>
+        <a href="/advertisement/profile">Your profile</a>
+        <a href="/advertisement/favorites" class="heart" title="Favorites">❤</a>
+    </div>
+</div>
+
+<div class="info-container" th:if="${advertisement != null}">
+    <h2 th:text="${advertisement.title} ?: 'No Title'">Ad Title</h2>
+    <img th:src="@{/uploads/{filename}(filename=${advertisement.imageUrl})}" alt="Ad Image" th:if="${advertisement.imageUrl != null}" />
+    <img src="/images/placeholder.jpg" alt="No image" th:if="${advertisement.imageUrl == null}" />
+    <div class="price" th:text="${advertisement.price != null} ? ${advertisement.price + ' ₴'} : 'No Price'">Price</div>
+    <div class="desc"><strong>Description:</strong><br /><span th:text="${advertisement.description} ?: 'No Description'">Description</span></div>
+    <div class="date"><strong>Created At:</strong> <span th:text="${advertisement.formattedCreatedAt} ?: 'No Date'">Date</span></div>
+
+    <div style="margin-top: 20px;">
+        <form th:if="${currentUser == null or advertisement.user == null or currentUser.id != advertisement.user.id}"
+              th:action="@{/advertisement/favorites/add}" method="post" style="display: inline;">
+            <input type="hidden" name="adId" th:value="${advertisement.id}" />
+            <button type="submit" class="btn-fav">Add to Favorites ❤</button>
+        </form>
+        <a th:if="${currentUser == null or advertisement.user == null or currentUser.id != advertisement.user.id}"
+           th:href="@{/advertisement/buy(adId=${advertisement.id})}" class="btn-buy">Buy</a>
+        <div th:if="${currentUser != null and advertisement.user != null and currentUser.id == advertisement.user.id}"
+             class="own-ad-message">
+            You cannot buy or favorite your own advertisement.
+        </div>
+    </div>
+
+    <div class="user-info-section">
+        <img th:src="@{/uploads/{filename}(filename=${advertisement.user.avatarUrl})}" alt="User avatar" class="user-avatar" th:if="${advertisement.user != null and advertisement.user.avatarUrl != null}" />
+        <img src="/uploads/anonim.png" alt="Default avatar" class="user-avatar" th:if="${advertisement.user == null or advertisement.user.avatarUrl == null}" />
+        <p><span class="label">Phone:</span> <span th:text="${advertisement.user?.phone} ?: 'Not specified'">Phone</span></p>
+        <p><span class="label">Email:</span> <span th:text="${advertisement.user?.email} ?: 'Not specified'">Email</span></p>
+        <a th:if="${advertisement.user != null and advertisement.user.email != null and advertisement.user.email != ''}"
+           th:href="'https://mail.google.com/mail/?view=cm&fs=1&to=' + ${advertisement.user.email}"
+           th:attr="data-href='https://mail.google.com/mail/?view=cm&fs=1&to=' + ${advertisement.user.email}"
+           target="_blank"
+           class="btn-message">Write a Message</a>
+        <p th:if="${advertisement.user == null or advertisement.user.email == null or advertisement.user.email == ''}"
+           class="no-email">Email not available for messaging.</p>
+    </div>
+</div>
+
+<div class="error-message" th:if="${advertisement == null}">
+    <p>Advertisement not found.</p>
+</div>
+
+</body>
+</html>

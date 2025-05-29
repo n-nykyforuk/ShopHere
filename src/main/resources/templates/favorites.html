@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Favorites - ShopHere</title>
+    <link rel="stylesheet" href="/css/styles.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url("/uploads/background.jpg");
+            color: #333;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #2b2b2b;
+            color: white;
+            padding: 10px 20px;
+        }
+        .navbar .left {
+            font-weight: bold;
+            font-size: 1.5em;
+        }
+        .navbar .search-form {
+            display: flex;
+            align-items: center;
+        }
+        .navbar .search-form input {
+            padding: 5px;
+            border: none;
+            border-radius: 3px 0 0 3px;
+            outline: none;
+        }
+        .navbar .search-form button {
+            padding: 5px 10px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+            border-radius: 0 3px 3px 0;
+            cursor: pointer;
+        }
+        .navbar .right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        .navbar .right a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .navbar .right .heart {
+            cursor: pointer;
+            font-size: 1.5em;
+            color: #ff4d4d;
+        }
+        .favorites-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: transparent;
+        }
+        @media (max-width: 1000px) {
+            .favorites-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        @media (max-width: 600px) {
+            .favorites-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        .favorite-card {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+            display: flex;
+            flex-direction: column;
+            background-color: #ffffff;
+        }
+        .favorite-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            background-color: transparent;
+        }
+        .favorite-content {
+            padding: 10px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background-color: transparent;
+        }
+        .favorite-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .favorite-title {
+            font-weight: bold;
+            margin-bottom: 0;
+        }
+        .favorite-price {
+            color: green;
+            font-weight: 600;
+        }
+        .favorite-date {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+        .favorite-buttons {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 5px;
+        }
+        .favorite-buttons a, .favorite-buttons button {
+            padding: 5px 10px;
+            font-size: 0.9em;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            min-width: 60px;
+            text-align: center;
+        }
+        .btn-info {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+        }
+        .btn-remove {
+            background-color: #ff4d4d;
+            color: white;
+            margin-left: auto;
+        }
+        .favorite-header .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid #ccc;
+        }
+        .no-favorites {
+            text-align: center;
+            padding: 20px;
+            background-color: #ffffff;
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="left">ShopHere</div>
+    <div class="search-form">
+        <form th:action="@{/advertisement}" method="get">
+            <input type="text" name="search" placeholder="Search by title..." />
+            <button type="submit">Search</button>
+        </form>
+    </div>
+    <div class="right">
+        <a href="/advertisement/create">Add your advertisement</a>
+        <a href="/advertisement/mine">Your advertisement</a>
+        <a href="/advertisement/profile">Your profile</a>
+        <a href="/advertisement/favorites" class="heart" title="Favorites">❤</a>
+    </div>
+</div>
+
+<div class="favorites-container" th:if="${favorites != null and !favorites.isEmpty()}">
+    <div th:each="ad : ${favorites}" class="favorite-card">
+        <img th:src="@{/uploads/{filename}(filename=${ad.imageUrl})}" alt="Ad Image" th:if="${ad.imageUrl != null}" />
+        <img src="/images/placeholder.jpg" alt="No image" th:if="${ad.imageUrl == null}" />
+        <div class="favorite-content">
+            <div>
+                <div class="favorite-header">
+                    <img th:src="@{/uploads/{filename}(filename=${ad.user.avatarUrl})}" alt="User avatar" class="user-avatar" th:if="${ad.user != null and ad.user.avatarUrl != null}" />
+                    <img src="/uploads/anonim.png" alt="Default avatar" class="user-avatar" th:if="${ad.user == null or ad.user.avatarUrl == null}" />
+                    <div class="favorite-title" th:text="${ad.title} ?: 'No Title'">Title</div>
+                </div>
+                <div class="favorite-price" th:text="${ad.price != null} ? ${ad.price + ' ₴'} : 'No Price'">Price</div>
+                <div class="favorite-date" th:text="${ad.formattedCreatedAt} ?: 'No Date'">Date</div>
+            </div>
+            <div class="favorite-buttons">
+                <a th:href="@{/advertisement/info/{id}(id=${ad.id})}" class="btn-info">Info</a>
+                <form th:action="@{/advertisement/favorites/remove}" method="post" style="display:inline;">
+                    <input type="hidden" name="adId" th:value="${ad.id}" />
+                    <button type="submit" class="btn-remove">Remove ❤</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div th:if="${favorites == null or favorites.isEmpty()}">
+    <div class="no-favorites">
+        <p>No favorite advertisements yet.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <title>ShopHere - Advertisements</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-image: url("/uploads/background.jpg");
+      color: #333;
+    }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #2b2b2b;
+      color: white;
+      padding: 10px 20px;
+    }
+    .navbar .left {
+      font-weight: bold;
+      font-size: 1.5em;
+    }
+    .navbar .right {
+      display: flex;
+      gap: 15px;
+      align-items: center;
+    }
+    .navbar .search-form {
+      display: flex;
+      align-items: center;
+    }
+    .navbar .search-form input {
+      padding: 5px;
+      border: none;
+      border-radius: 3px 0 0 3px;
+      outline: none;
+    }
+    .navbar .search-form button {
+      padding: 5px 10px;
+      border: none;
+      background-color: #007bff;
+      color: white;
+      border-radius: 0 3px 3px 0;
+      cursor: pointer;
+    }
+    .navbar .right a {
+      color: white;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .navbar .right .heart {
+      cursor: pointer;
+      font-size: 1.5em;
+      color: #ff4d4d;
+    }
+    .ads-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 10px;
+      max-width: 1400px;
+      margin: 20px auto;
+      background-color: transparent;
+      min-width: 600px;
+    }
+    @media (max-width: 1000px) {
+      .ads-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 600px) {
+      .ads-container {
+        grid-template-columns: 1fr;
+      }
+    }
+    .ad-card {
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+      display: flex;
+      flex-direction: column;
+      background-color: #ffffff;
+    }
+    .ad-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: contain;
+      background-color: transparent;
+    }
+    .ad-content {
+      padding: 10px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      background-color: transparent;
+    }
+    .ad-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 5px;
+    }
+    .ad-title {
+      font-weight: bold;
+      margin-bottom: 0;
+    }
+    .ad-price {
+      color: green;
+      font-weight: 600;
+    }
+    .ad-date {
+      font-size: 0.8em;
+      color: #666;
+      margin-top: 5px;
+    }
+    .ad-buttons {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 5px;
+    }
+    .ad-buttons a, .ad-buttons button {
+      padding: 5px 10px;
+      font-size: 0.9em;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      min-width: 60px;
+      text-align: center;
+    }
+    .btn-info {
+      background-color: #007bff;
+      color: white;
+      text-decoration: none;
+    }
+    .btn-buy {
+      background-color: #28a745;
+      color: white;
+      text-decoration: none;
+    }
+    .btn-update {
+      background-color: #ffc107;
+      color: white;
+      text-decoration: none;
+    }
+    .btn-fav {
+      background-color: #ff4d4d;
+      color: white;
+    }
+    .delete-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .ad-header .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid #ccc;
+    }
+    .sold-label {
+      background-color: #ff4d4d;
+      color: white;
+      padding: 2px 8px;
+      border-radius: 3px;
+      display: inline-block;
+      margin-top: 5px;
+    }
+    .disabled-btn {
+      background-color: #cccccc !important;
+      cursor: not-allowed !important;
+      opacity: 0.6;
+    }
+    .disabled-link {
+      pointer-events: none;
+      background-color: #cccccc !important;
+      color: #666 !important;
+      cursor: not-allowed !important;
+    }
+    .message {
+      margin: 20px auto;
+      padding: 10px;
+      border-radius: 4px;
+      text-align: center;
+      max-width: 1400px;
+    }
+    .message.success {
+      background-color: #d4edda;
+      color: #155724;
+    }
+    .message.error {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+    .own-ad-message {
+      margin-left: 10px;
+      color: #666;
+      font-style: italic;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+<div class="navbar">
+  <div class="left">ShopHere</div>
+  <div class="search-form">
+    <form th:action="@{/advertisement}" method="get">
+      <input type="text" name="search" placeholder="Search by title..." />
+      <button type="submit">Search</button>
+    </form>
+  </div>
+  <div class="right">
+    <a href="/advertisement/create">Add your advertisement</a>
+    <a href="/advertisement/mine">Your advertisement</a>
+    <a href="/advertisement/profile">Your profile</a>
+    <a href="/advertisement/favorites" class="heart" title="Favorites">❤</a>
+  </div>
+</div>
+
+<div th:if="${message}" class="message" th:classappend="${message.contains('successful') ? 'success' : 'error'}" id="success">
+  <p th:text="${message}">Message</p>
+</div>
+
+<div class="ads-container">
+  <div th:each="ad : ${advertisements}" class="ad-card" th:if="${ad != null && ad.user != null}">
+    <img th:src="@{/uploads/{filename}(filename=${ad.imageUrl})}" alt="image" th:if="${ad.imageUrl != null}" />
+    <img src="/images/placeholder.jpg" alt="jpg" th:if="${ad.imageUrl == null}" />
+    <div class="ad-content">
+      <div>
+        <div class="ad-header">
+          <img th:src="@{/uploads/{filename}(filename=${ad.user.avatarUrl})}" alt="User avatar" class="user-avatar" th:if="${ad.user != null and ad.user.avatarUrl != null}" />
+          <img src="/uploads/anonim.png" alt="Default avatar" class="user-avatar" th:if="${ad.user == null or ad.user.avatarUrl == null}" />
+          <div class="ad-title" th:text="${ad.title}">Title</div>
+        </div>
+        <div class="ad-price" th:text="${ad.price} + ' ₴'">Price</div>
+        <div class="ad-date" th:if="${ad.createdAt}" th:text="${ad.getFormattedCreatedAt()}">Data:</div>
+        <div class="ad-status">
+          <label th:if="${ad.status.toString() == 'SOLD'}" class="sold-label" th:text="'sold'"></label>
+        </div>
+      </div>
+      <div class="ad-buttons">
+        <!-- Показуємо Info лише для чужих оголошень -->
+        <a th:if="${currentUser == null or ad.user == null or currentUser.id != ad.user.id}"
+           th:href="@{/advertisement/info/{id}(id=${ad.id})}" class="btn-info"
+           th:classappend="${ad.status.toString() == 'SOLD' ? 'disabled-link' : ''}"
+           th:attr="disabled=${ad.status.toString() == 'SOLD' ? true : false}">Info</a>
+
+        <!-- Показуємо Update лише для власних оголошень -->
+        <a th:if="${currentUser != null and ad.user != null and currentUser.id == ad.user.id}"
+           th:href="@{/advertisement/update/{id}(id=${ad.id})}" class="btn-update">Update</a>
+
+        <!-- Додаємо видалення для власних оголошень -->
+        <form th:if="${currentUser != null and ad.user != null and currentUser.id == ad.user.id}"
+              th:action="@{/advertisement/delete}" method="post" style="display:inline;">
+          <input type="hidden" name="adId" th:value="${ad.id}" />
+          <button type="submit" class="delete-btn"
+                  onclick="return confirm('Are you sure you want to delete this advertisement?')">Delete</button>
+        </form>
+
+        <div th:if="${currentUser == null or ad.user == null or currentUser.id != ad.user.id}">
+          <a th:href="@{/advertisement/buy(adId=${ad.id})}" class="btn-buy"
+             th:classappend="${ad.status.toString() == 'SOLD' ? 'disabled-link' : ''}"
+             th:attr="disabled=${ad.status.toString() == 'SOLD' ? true : false}">Buy</a>
+
+          <form th:action="@{/advertisement/favorites/add}" method="post" style="display:inline;"
+                th:attr="disabled=${ad.status.toString() == 'SOLD' ? true : false}">
+            <input type="hidden" name="adId" th:value="${ad.id}" />
+            <button type="submit" class="btn-fav"
+                    th:classappend="${ad.status.toString() == 'SOLD' ? 'disabled-btn' : ''}">❤</button>
+          </form>
+        </div>
+
+        <div th:if="${currentUser != null and ad.user != null and currentUser.id == ad.user.id}"
+             class="own-ad-message">
+          You cannot buy or favorite your own advertisements.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const messageElement = document.getElementById('success');
+    if (messageElement) {
+      setTimeout(function() {
+        messageElement.style.display = 'none';
+      }, 3000);
+    }
+  });
+</script>
+</body>
+</html>
